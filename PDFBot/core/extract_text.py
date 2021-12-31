@@ -2,7 +2,7 @@ from PyPDF2.pdf import PdfFileReader
 
 
 async def extract_text(path: str, page: int):
-    page = page - 1
+    page -= 1
     with open(path, 'rb') as f:
         pdf = PdfFileReader(f)
         try:
