@@ -86,7 +86,10 @@ async def _callbacks(bot: Client, callback_query: CallbackQuery):
                 await rotate_pdf(pdf, output, direction)
             else:
                 await rotate_pdf(pdf, output, direction, numbers=pages)
-            await callback_query.message.reply_document(output, caption=f"Rotated by @StarkBots")
+            await callback_query.message.reply_document(
+                output, caption='Rotated by @StarkBots'
+            )
+
         elif query == "decrypt":
             await callback_query.answer()
             data = await bot.ask(user_id, "Please provide the original password for decryption.")
@@ -98,12 +101,14 @@ async def _callbacks(bot: Client, callback_query: CallbackQuery):
             while True:
                 if success:
                     break
-                else:
-                    data = await bot.ask(user_id, "The provided password for decryption is incorrect. Please try again or /cancel", filters=filters.text)
-                    if await cancelled(data):
-                        return
-                    success = await decrypt_pdf(pdf, output, data.text)
-            await callback_query.message.reply_document(output, quote=True, caption=f"Decrypted by @StarkBots")
+                data = await bot.ask(user_id, "The provided password for decryption is incorrect. Please try again or /cancel", filters=filters.text)
+                if await cancelled(data):
+                    return
+                success = await decrypt_pdf(pdf, output, data.text)
+            await callback_query.message.reply_document(
+                output, quote=True, caption='Decrypted by @StarkBots'
+            )
+
             os.remove(pdf)
             os.remove(output)
         elif query == "encrypt":
@@ -191,12 +196,11 @@ async def _callbacks(bot: Client, callback_query: CallbackQuery):
                 if len(pages) == 0:
                     await callback_query.message.reply("A provided page number doesn't exist. Cancelling.")
                 else:
-                    to = f"{pages[0]} to {pages[-1]}" if not len(pages) == 1 else pages[0]
+                    to = f"{pages[0]} to {pages[-1]}" if len(pages) != 1 else pages[0]
                     caption = f"Split File {list(files.keys()).index(file)+1} \n\nPages {to} \nTotal Pages : {len(pages)} \n\nBy @StarkBots"
                     await callback_query.message.reply_document(file, caption=caption)
     except TimeoutError:
         merging[user_id] = False
-        pass
     except FileNotFoundError:
         await callback_query.message.reply("Please send me the file again as it doesn't exist now.")
         await callback_query.message.delete()
@@ -221,7 +225,7 @@ async def get_pdf(user_id):
             answer.append(file)
         else:
             os.remove(file)
-    if len(answer) == 0:
+    if not answer:
         # In case forwarded a file starting with name "user_id"
         if len(files) == 1:
             return f"downloads/{user_id}/{files[0]}"
